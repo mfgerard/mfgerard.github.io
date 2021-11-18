@@ -1,0 +1,151 @@
+<html>
+
+    <head>
+        <!-- Load the latest version of TensorFlow.js -->
+        <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>-->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+        <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    </head>
+    
+    <body>
+    
+        <div class="container py-3" style="text-align: center;">
+            
+            <!--===================================================-->
+            <div class="row">
+                <div id='buttons_form'>
+                    <h3>Elije el nombre con el que identificar&aacute;s las dos situaciones!!!</h3>
+                    <form method="POST">
+                        <input type="text" class="form-control" id="button1" placeholder="" value="Con barbijo" style='color:#AEAEAE;'><br/>
+                        <input type="text"  class="form-control" id="button2" placeholder="" value="Sin barbijo" style='color:#AEAEAE;'>
+                    </form>
+                    <button type="button" class="btn btn-primary" onclick="update_buttons()">Comenzar!</button>
+                </div>
+            </div>
+            <!--===================================================-->
+            
+            
+            <!--===================================================-->
+            <div class="row" style="text-align: center;">
+                
+                <div class="col">
+                    
+                    <div id='bar' style='display:none;'>
+                        </br>
+                        <div id='progress-bar' class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Take image from webcam to inference -->
+                    <div id="console" style="font-size: 1.2rem;"></div>
+                        <video autoplay playsinline muted  id="webcam" width="224" height="224" style="padding: 5px; margin: 5px; "></video>  
+                        <br/>
+                        <button type="button" class="btn btn-primary" id="class-a" style="display:none; margin: 5px;background-color:red; border-color:red;"></button>
+                        <button type="button" class="btn btn-secondary" id="class-b" style="display:none; margin: 5px;background-color:green; border-color:green;">Fondo</button>
+                        <button type="button" class="btn btn-primary" id="class-c" style="display:none; margin: 5px;background-color:blue; border-color:blue;"></button>
+                    </div>
+                
+                </div>
+            
+                <!-- Menu -->
+                <div id="options" style="font-size: 1.2rem;"></div>
+                    <br/>
+                    <button type="button" class="btn btn-outline-secondary" id="btn-instrucciones" onclick="on_instrucciones()">Instrucciones</button>
+                    <button type="button" class="btn btn-outline-secondary" id="btn-desafios" onclick="on_desafios()">Desaf&iacute;os</button>
+                </div>
+            
+            </div>
+            <!--===================================================-->
+            
+        
+        
+            <!--===================================================-->
+            <div class="container">
+                
+                <!--Row with two equal columns-->
+                <div class="row ">
+                    
+                    <!---////////////////////////////////////////////-->
+                    <!--Instrucciones-->
+                    <div id="instrucciones" class="container-sm px-3 py-4" style="display:none">
+                        
+                        <h4 class="text-left"><b>Ejemplo</b>:&#191;Tengo puesto el barbijo?</h4>
+                        
+                        <span class="text-justify">
+                            <p>En este experimento vamos a ense&#241;arle a la computadora a distinguir cu&aacute;ndo tenemos puesto el barbijo y cu&aacute;ndo no. Para eso, vamos a seguir los siguiente pasos:</p>
+                            
+                            <ol>
+                            
+                                <li class="py-2">En los campos que aparecen para completar al inicio, introduce el texto <span style="color:gray;padding:5px; border:1px solid gray;">Con barbijo</span> y <span style="color:gray;padding:5px; border:1px solid gray;">Sin barbijo</span> en cada campo que aparece al inicio de la p&aacute;gina. No importa en cu&aacute;l escribas cada texto. Tampoco es importante que respetes las may&uacute;sculas y min&uacute;sculas. Una vez finalizado presiona el bot&oacute;n <b style="background-color:blue;color:white;padding:5px;">Comenzar!</b>.</li>
+                                
+                                <li class="py-2">Toma 5 fotos con el <span style="background-color:green;color:white;padding:5px;">bot&oacute;n verde</span>, manteniendo la c&aacute;mara quieta, y sin que haya nadie en frente de ella. Estas im&aacute;genes servir&aacute;n para que la red neuronal aprenda cu&aacute;ndo no hay nadie frente a la c&aacute;mara. Cuantas m&aacute;s fotos tomes, m&aacute;s ejemplos tendr&aacute; para aprender. La aplicaci&oacute;n ir&aacute; aprendiendo a responder correctamente a medida que tomes las fotos.</li>
+                                
+                                <li class="py-2">Toma 5 fotos con el <span style="background-color:red;color:white;padding:5px;">bot&oacute;n rojo</span>, manteniendo la c&aacute;mara quieta, haciendo lo que indica el primer bot&oacute;n. Si dice <i>Con barbijo</i>, entonces ponte el barbijo y tomas las fotos. Estas im&aacute;genes servir&aacute;n para que la red neuronal aprenda a asociar lo que <i>"ve"</i> en la foto con lo que indicaste en el bot&oacute;n. Cuantas m&aacute;s fotos tomes, m&aacute;s ejemplos tendr&aacute; para aprender. Puedes mover un poco la cabeza cada vez que tomes una nueva foto, para que pueda verte en diferentes &aacute;ngulos. La aplicaci&oacute;n ir&aacute; aprendiendo a responder correctamente a medida que tomes las fotos.</li>
+                                
+                                <li class="py-2">Toma 5 fotos con el <span style="background-color:blue;color:white;padding:5px;">bot&oacute;n azul</span>, manteniendo la c&aacute;mara quieta, haciendo lo que indica el primer bot&oacute;n. Si el bot&oacute;n dice <i>Sin barbijo</i>, entonces qu&iacute;tate el barbijo si lo ten&iacute;as puesto y toma las fotos. Estas im&aacute;genes servir&aacute;n para que la red neuronal aprenda a asociar lo que <i>"ve"</i> en la foto con lo que indicaste en el bot&oacute;n. Cuantas m&aacute;s fotos tomes, m&aacute;s ejemplos tendr&aacute; para aprender. Puedes mover un poco la cabeza cada vez que tomes una nueva foto, para que pueda verte en diferentes &aacute;ngulos. La aplicaci&oacute;n ir&aacute; aprendiendo a responder correctamente a medida que tomes las fotos.</li>
+                            
+                            </ol>
+                            
+                            <p>Una vez que hayas terminado, ponte delante de la c&aacute;mara y prueba a ponerte y sacarte el barbijo. Si la compu aprendi&oacute; correctamente, deber&iacute;a decirte cu&aacute;ndo lo tienes puesto y cu&aacute;ndo no. Si notas que le cuesta decidir, toma m&aacute;s fotos con cada bot&oacute;n para que tenga m&aacute;s ejemplos para aprender.</p>
+                            
+                            <p>Ahora, llama a un familiar o amigo y dile que se ponga delante de la c&aacute;mara con el barbijo puesto. &#191;Ser&aacute; capaz de darse cuenta que tiene puesto el barbijo sin tomar nuevas fotos...?</p>
+
+                        </span>
+                    
+                    </div>
+                    <!---////////////////////////////////////////////-->
+                    
+                </div>
+                <!--===================================================-->
+                
+                
+                <!--===================================================-->
+                <div id="desafios" class="container-sm px-3 py-4" style="display:none">
+                
+                    <!--Row with two equal columns-->
+                    <div class="row ">
+                        
+                        <!---////////////////////////////////////////////-->
+                        <!--Desaf&iacute;os-->
+                        <div class="container-sm px-3 py-4">
+                        
+                            <h4 class="text-left">Te proponemos algunos desaf&iacute;os!!</h4>
+                            
+                            <span class="text-justify">
+                            
+                            <il>
+                            
+                                <li class="py-2">&#191;Podr&aacute; esta aplicaci&oacute;n distinguirme de otra persona?</li>
+                                
+                                <li class="py-2">&#191;Me reconocer&aacute; si me pongo lentes o una gorra?</li>
+                                
+                                <li class="py-2">&#191;Podr&aacute; distinguir una naranja de una manzana?</li>
+                                
+                                <li class="py-2">&#191;Qu&eacute; otros desaf&iacute;os se te ocurren?</li>
+                            
+                            </il>
+                            
+                            </span>
+                            
+                        </div>
+                        <!---////////////////////////////////////////////-->
+                        
+                    </div>
+                    
+                </div>
+                <!--===================================================-->
+            </div>
+            
+            
+            <!-- Load index.js after the content of the page -->
+            <script src="index.js"></script>
+            
+        </div>
+    
+    </body>
+  
+</html>
